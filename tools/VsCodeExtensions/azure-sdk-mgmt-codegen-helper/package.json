@@ -14,15 +14,42 @@
   "contributes": {
     "commands": [
       {
-        "command": "azure-sdk-mgmt-codegen-helper.helloWorld",
-        "title": "Hello World"
+        "command": "azure-sdk-mgmt-codegen-helper.regenerate-code-with-latest-spec",
+        "title": "Regenerate code with latest spec"
+      },
+      {
+        "command": "azure-sdk-mgmt-codegen-helper.regenerate-code",
+        "title": "Regenerate code"
+      },
+      {
+        "command": "azure-sdk-mgmt-codegen-helper.regenerate-api-file",
+        "title": "Regenerate api file"
+      },
+      {
+        "command": "azure-sdk-mgmt-codegen-helper.update-changelog",
+        "title": "Update changelog"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "azure-sdk-mgmt-codegen-helper.helloWorld",
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-code",
           "group": "AzureSdkMgmtCodeGenHelper",
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-code-with-latest-spec",
+          "group": "AzureSdkMgmtCodeGenHelper@1",
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-api-file",
+          "group": "AzureSdkMgmtCodeGenHelper@2",
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.update-changelog",
+          "group": "AzureSdkMgmtCodeGenHelper@3",
           "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
         }
       ]
