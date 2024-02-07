@@ -23,7 +23,7 @@
         {
           "command": "azure-sdk-mgmt-codegen-helper.helloWorld",
           "group": "AzureSdkMgmtCodeGenHelper",
-          "when": "resourceLangId == markdown && resourcePath =~ /^.*\\\\sdk\\\\[\\w\\d\\.\\_]+\\\\Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?\\\\src\\\\autorest\\.md$/"
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
         }
       ]
     }
