@@ -52,7 +52,11 @@
 
 	"features":{
 		"ghcr.io/devcontainers/features/powershell:1": {},
-		"ghcr.io/devcontainers-community/npm-features/typescript:1": {}
+		"ghcr.io/devcontainers-community/npm-features/typescript:1": {},
+		"ghcr.io/devcontainers/features/dotnet:2": {
+			"version": "6.0",
+			"additionalVersions": "7.0, 8.0"
+		}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
