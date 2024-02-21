@@ -43,7 +43,7 @@
 
 	"postCreateCommand": "cd /home/codespace/workspace/tools/VsCodeExtensions/azure-sdk-mgmt-codegen-helper/ && npm install && tsc -p ./ && cp -r -f /home/codespace/workspace/tools/VsCodeExtensions/azure-sdk-mgmt-codegen-helper/ /home/codespace/.vscode-remote/extensions/azure-sdk.azure-sdk-mgmt-codegen-helper/",
 
-	"postAttachCommand": "cd /home/codespace/workspace/ && git fetch upstream main --tags"
+	"postAttachCommand": "cd /home/codespace/workspace/ && git fetch upstream main --tags",
 	
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
