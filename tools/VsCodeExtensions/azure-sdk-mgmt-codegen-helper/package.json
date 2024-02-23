@@ -35,6 +35,28 @@
       }
     ],
     "menus": {
+      "editor/context":[
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-code",
+          "group": "AzureSdkMgmtCodeGenHelper",
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-code-with-latest-spec",
+          "group": "AzureSdkMgmtCodeGenHelper@1",
+          "when": "resourceLangId == markdown && resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.regenerate-api-file",
+          "group": "AzureSdkMgmtCodeGenHelper@2",
+          "when": "resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/ || resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]api[\\\\/][\\w\\d\\.\\_]+\\.cs?$/"
+        },
+        {
+          "command": "azure-sdk-mgmt-codegen-helper.update-changelog",
+          "group": "AzureSdkMgmtCodeGenHelper@3",
+          "when": "resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]src[\\\\/]autorest\\.md$/ || resourcePath =~ /^.*[\\\\/]sdk[\\\\/][\\w\\d\\.\\_]+[\\\\/]Azure\\.ResourceManager(\\.[\\w\\d\\.\\_]*)?[\\\\/]CHANGELOG\\.md$/"
+        }
+      ],
       "explorer/context": [
         {
           "command": "azure-sdk-mgmt-codegen-helper.regenerate-code",

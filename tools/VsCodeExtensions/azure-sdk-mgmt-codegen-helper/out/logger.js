@@ -27,19 +27,29 @@ exports.Logger = void 0;
 const vscode = __importStar(require("vscode"));
 class Logger {
     static output = vscode.window.createOutputChannel("AzureSdkMgmtCodeGen");
-    static logVerbose(message) {
+    static logVerbose(message, popup = false) {
         Logger.output.appendLine("[Verbose] " + message);
+        if (popup) {
+            vscode.window.showInformationMessage(message);
+        }
     }
-    static logInfo(message) {
+    static logInfo(message, popup = false) {
         Logger.output.appendLine("[Info] " + message);
+        if (popup) {
+            vscode.window.showInformationMessage(message);
+        }
     }
-    static logWarning(message) {
+    static logWarning(message, popup = true) {
         Logger.output.appendLine("[Warning] " + message);
-        vscode.window.showWarningMessage(message);
+        if (popup) {
+            vscode.window.showWarningMessage(message);
+        }
     }
-    static logError(message) {
+    static logError(message, popup = true) {
         Logger.output.appendLine("[Error] " + message);
-        vscode.window.showErrorMessage(message);
+        if (popup) {
+            vscode.window.showErrorMessage(message);
+        }
     }
     static showLogOutput() {
         Logger.output.show();

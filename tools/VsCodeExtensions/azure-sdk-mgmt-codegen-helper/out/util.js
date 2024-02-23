@@ -9,32 +9,37 @@ const axios_1 = __importDefault(require("axios"));
 const logger_1 = require("./logger");
 const path_1 = __importDefault(require("path"));
 //#region codegen utils
-function dotnetBuildGenerateCode(autorestMdPath, onClose = undefined) {
+function dotnetBuildGenerateCode(autorestMdPath, expectedExitCode = 0) {
     const srcFolder = path_1.default.dirname(autorestMdPath);
-    startProcess("dotnet", ["build", "/t:GenerateCode"], srcFolder, "codegen", onClose);
+    return startProcess("dotnet", ["build", "/t:GenerateCode"], srcFolder, "codegen", expectedExitCode);
 }
 exports.dotnetBuildGenerateCode = dotnetBuildGenerateCode;
 //#endregion
 //#region process utils
-function runPowershellScript(scriptPath, args, workFolder, onClose = undefined) {
-    startProcess("pwsh", ["-file", scriptPath, ...args], workFolder, "ps", onClose);
+function runPowershellScript(scriptPath, args, workFolder, expectedExitCode = 0) {
+    return startProcess("pwsh", ["-file", scriptPath, ...args], workFolder, "ps", expectedExitCode);
 }
 exports.runPowershellScript = runPowershellScript;
-function startProcess(exe, args, workFolder, logName, onClose = undefined) {
-    logger_1.Logger.logVerbose(`Start running: "${exe} ${args.map(s => `'${s}'`).join(" ")}" in ${workFolder}...`);
-    const dn = (0, child_process_1.spawn)(exe, [...args], { cwd: workFolder });
-    const logPre = logName ? `${logName}: ` : "";
-    dn.stdout.on("data", (data) => {
-        logger_1.Logger.logVerbose(`${logPre}${data}`.trim());
-    });
-    dn.stderr.on("data", (data) => {
-        logger_1.Logger.logError(`${logPre}${data}`.trim());
-    });
-    dn.on("close", (code) => {
-        logger_1.Logger.logVerbose(`${logPre}exit code:${code}`.trim());
-        if (onClose) {
-            onClose(code);
-        }
+function startProcess(exe, args, workFolder, logName, expectedExitCode = 0) {
+    return new Promise((resolve, reject) => {
+        logger_1.Logger.logVerbose(`Start running: "${exe} ${args.map(s => `'${s}'`).join(" ")}" in ${workFolder}...`);
+        const dn = (0, child_process_1.spawn)(exe, [...args], { cwd: workFolder });
+        const logPre = logName ? `${logName}: ` : "";
+        dn.stdout.on("data", (data) => {
+            logger_1.Logger.logVerbose(`${logPre}${data}`.trim());
+        });
+        dn.stderr.on("data", (data) => {
+            logger_1.Logger.logError(`${logPre}${data}`.trim());
+        });
+        dn.on("close", (code) => {
+            logger_1.Logger.logVerbose(`${logPre}exit code:${code}`.trim());
+            if (code === expectedExitCode) {
+                resolve(code);
+            }
+            else {
+                reject("Process failed with exit code: " + code);
+            }
+        });
     });
 }
 exports.startProcess = startProcess;

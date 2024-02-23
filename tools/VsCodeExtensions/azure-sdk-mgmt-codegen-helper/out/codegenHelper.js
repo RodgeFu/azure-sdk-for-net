@@ -30,38 +30,29 @@ const fs_1 = require("fs");
 const codegenContext_1 = require("./codegenContext");
 const vscode = __importStar(require("vscode"));
 class CodeGenHelper {
-    static generateCode(cgContext) {
-        logger_1.Logger.showLogOutput();
-        logger_1.Logger.logInfo("Generate code...");
-        (0, util_1.dotnetBuildGenerateCode)(cgContext.autorestMdPath, (code) => { logger_1.Logger.logInfo("Code generation completed"); });
+    static async generateCode(cgContext) {
+        await (0, util_1.dotnetBuildGenerateCode)(cgContext.autorestMdPath);
     }
-    static generateCodeWithLatestSpec(cgContext) {
-        logger_1.Logger.showLogOutput();
-        logger_1.Logger.logInfo("Generate code with latest azure-rest-api-spec...");
-        (0, util_1.getLatestCommitIdFromGitHub)("Azure", "azure-rest-api-specs", "main").then((value) => {
-            try {
-                const autorestMdPath = cgContext.autorestMdPath;
-                logger_1.Logger.logInfo("Update spec ref in autorest.md to latest commit with id: " + value);
-                const autorestMd = (0, fs_1.readFileSync)(autorestMdPath, 'utf-8');
-                const newAutorestMd = autorestMd.replace(/(https:\/\/github\.com\/Azure\/azure-rest-api-specs\/blob\/)([\w\d]+)(\/specification\/.+)/gi, `$1${value}$3`);
-                (0, fs_1.writeFileSync)(autorestMdPath, newAutorestMd, 'utf-8');
-                (0, util_1.dotnetBuildGenerateCode)(autorestMdPath, (code) => { logger_1.Logger.logInfo("Code generation completed"); });
-            }
-            catch (error) {
-                logger_1.Logger.logError("Unexpected error: " + error);
-            }
-        }, (reason) => {
+    static async generateCodeWithLatestSpec(cgContext) {
+        try {
+            const value = await (0, util_1.getLatestCommitIdFromGitHub)("Azure", "azure-rest-api-specs", "main");
+            const autorestMdPath = cgContext.autorestMdPath;
+            logger_1.Logger.logInfo("Update spec ref in autorest.md to latest commit with id: " + value);
+            const autorestMd = (0, fs_1.readFileSync)(autorestMdPath, 'utf-8');
+            const newAutorestMd = autorestMd.replace(/(https:\/\/github\.com\/Azure\/azure-rest-api-specs\/blob\/)([\w\d]+)(\/specification\/.+)/gi, `$1${value}$3`);
+            (0, fs_1.writeFileSync)(autorestMdPath, newAutorestMd, 'utf-8');
+            await (0, util_1.dotnetBuildGenerateCode)(autorestMdPath);
+            logger_1.Logger.logInfo("Code generation completed.");
+        }
+        catch (reason) {
             logger_1.Logger.logError("Error occurs when fetching latest commit id: " + reason);
-        });
+            throw reason;
+        }
     }
-    static generateApiFile(cgContext) {
-        logger_1.Logger.showLogOutput();
-        logger_1.Logger.logInfo("Regenerate api file...");
-        (0, util_1.runPowershellScript)(cgContext.exportApiScriptPath, [cgContext.serviceDirName], cgContext.apiFolder, (code) => { logger_1.Logger.logInfo("API file generation completed."); });
+    static async generateApiFile(cgContext) {
+        await (0, util_1.runPowershellScript)(cgContext.exportApiScriptPath, [cgContext.serviceDirName], cgContext.apiFolder);
     }
     static async updateChangeLog(cgContext) {
-        logger_1.Logger.showLogOutput();
-        logger_1.Logger.logInfo("Update CHANGELOG.md...");
         const version = await vscode.window.showInputBox({
             prompt: "Enter the version number of new release. i.e. 1.0.0",
             placeHolder: "1.0.0",
@@ -81,15 +72,13 @@ class CodeGenHelper {
             }
         });
         if (!version || !releaseDate) {
-            logger_1.Logger.logError(`Invalid version or releaseDate. Updating changelog cancelled.`);
+            throw new Error(`Invalid version or releaseDate. Updating changelog cancelled.`);
         }
         else {
-            (0, util_1.runPowershellScript)(cgContext.updateChangelogScriptPath, [cgContext.serviceDirName, version, releaseDate], cgContext.packageFolder, (code) => { logger_1.Logger.logInfo("Changelog update completed."); });
+            await (0, util_1.runPowershellScript)(cgContext.updateChangelogScriptPath, [cgContext.serviceDirName, version, releaseDate], cgContext.packageFolder);
         }
     }
     static async initNewSdk(sdkFolderPath) {
-        logger_1.Logger.showLogOutput();
-        logger_1.Logger.logInfo("Initialize New Azure SDK Service (Mgmt Plane)...");
         const serviceDirName = await vscode.window.showInputBox({
             prompt: "Enter a directory name that precisely represents your service while being concise and easily understandable. Make sure to use snake case and avoid acronyms.",
             placeHolder: "i.e. servicelinker",
@@ -103,8 +92,7 @@ class CodeGenHelper {
             }
         });
         if (serviceDirName === undefined || serviceDirName.length === 0) {
-            logger_1.Logger.logError("Invalid directory name. Creating new service cancelled.");
-            return;
+            throw new Error("Invalid directory name. Creating new service cancelled.");
         }
         const defaultPackageName = (serviceDirName[0].toUpperCase() + serviceDirName.slice(1)).replace(/[_\-]/g, "");
         const packageName = await vscode.window.showInputBox({
@@ -121,8 +109,7 @@ class CodeGenHelper {
             }
         });
         if (packageName === undefined || packageName.length === 0) {
-            logger_1.Logger.logError("Invalid package name. Creating new service cancelled.");
-            return;
+            throw new Error("Invalid package name. Creating new service cancelled.");
         }
         const defaultServiceName = packageName.split('.').pop() || "";
         const serviceName = await vscode.window.showInputBox({
@@ -139,13 +126,11 @@ class CodeGenHelper {
             }
         });
         if (serviceName === undefined || serviceName.length === 0) {
-            logger_1.Logger.logError("Invalid service name. Creating new service cancelled.");
-            return;
+            throw new Error("Invalid service name. Creating new service cancelled.");
         }
         const cg = codegenContext_1.CodeGenContext.fromSdkFolderPath(sdkFolderPath, serviceDirName, packageName);
         if (!cg) {
-            logger_1.Logger.logError("Failed to create context from sdk folder " + sdkFolderPath);
-            return;
+            throw new Error("Failed to create context from sdk folder " + sdkFolderPath);
         }
         if ((0, fs_1.existsSync)(cg.packageFolder)) {
             logger_1.Logger.logWarning(`Folder ${cg.serviceDirFolder} already exists.`);
@@ -155,28 +140,11 @@ class CodeGenHelper {
             logger_1.Logger.logInfo(`Folder ${cg.serviceDirFolder} created.`);
         }
         if (!(0, fs_1.existsSync)(cg.packageFolder)) {
-            logger_1.Logger.logError(`Failed to create folder ${cg.packageFolder}. Creating new service cancelled.`);
-            return;
+            throw new Error(`Failed to create folder ${cg.packageFolder}. Creating new service cancelled.`);
         }
-        (0, util_1.startProcess)("dotnet", ["new", "install", cg.templateFolder, "--force"], sdkFolderPath, "dotnet", (exitCode1) => {
-            if (exitCode1 !== 0) {
-                logger_1.Logger.logError("Failed to install template. Creating new service cancelled.");
-                return;
-            }
-            (0, util_1.startProcess)("dotnet", ["new", "azuremgmt", "--provider", serviceName, "--includeCI", "true"], cg.packageFolder, "dotnet", (exitCode2) => {
-                if (exitCode2 !== 0) {
-                    logger_1.Logger.logError("Failed to new azuremgmt. Creating new service cancelled.");
-                    return;
-                }
-                (0, util_1.runPowershellScript)(cg.updateMgmtCiScriptPath, [], cg.packageFolder, (exitCode3) => {
-                    if (exitCode3 !== 0) {
-                        logger_1.Logger.logError("Failed to update CI. Creating new service cancelled.");
-                        return;
-                    }
-                    logger_1.Logger.logInfo("New service created successfully.");
-                });
-            });
-        });
+        await (0, util_1.startProcess)("dotnet", ["new", "install", cg.templateFolder, "--force"], sdkFolderPath, "dotnet");
+        await (0, util_1.startProcess)("dotnet", ["new", "azuremgmt", "--provider", serviceName, "--includeCI", "true"], cg.packageFolder, "dotnet");
+        await (0, util_1.runPowershellScript)(cg.updateMgmtCiScriptPath, [], cg.packageFolder);
     }
 }
 exports.CodeGenHelper = CodeGenHelper;

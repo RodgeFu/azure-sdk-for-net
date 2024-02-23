@@ -7,35 +7,41 @@ import { CodeGenContext } from "./codegenContext";
 import { readFileSync } from "fs";
 
 //#region codegen utils
-export function dotnetBuildGenerateCode(autorestMdPath: string, onClose: ((code: any) => void) | undefined = undefined){
+export function dotnetBuildGenerateCode(autorestMdPath: string, expectedExitCode: number = 0) : Promise<number>{
     const srcFolder = path.dirname(autorestMdPath);
-	startProcess("dotnet", ["build", "/t:GenerateCode"], srcFolder, "codegen", onClose);
+	return startProcess("dotnet", ["build", "/t:GenerateCode"], srcFolder, "codegen", expectedExitCode);
 }
 //#endregion
 
 //#region process utils
-export function runPowershellScript(scriptPath: string, args: string[], workFolder: string, onClose: ((code: any) => void) | undefined = undefined){
-	startProcess("pwsh", ["-file", scriptPath, ...args], workFolder, "ps", onClose);
+export function runPowershellScript(scriptPath: string, args: string[], workFolder: string, expectedExitCode: number = 0): Promise<number>{
+	return startProcess("pwsh", ["-file", scriptPath, ...args], workFolder, "ps", expectedExitCode);
 }
 
-export function startProcess(exe: string, args: string[], workFolder: string, logName: string, onClose: ((code: any) => void) | undefined = undefined) {
-	Logger.logVerbose(`Start running: "${exe} ${args.map(s => `'${s}'`).join(" ")}" in ${workFolder}...`);
-	const dn = spawn(exe, [...args], { cwd: workFolder});
+export function startProcess(exe: string, args: string[], workFolder: string, logName: string, expectedExitCode: number = 0): Promise<number> {
 
-    const logPre = logName ? `${logName}: ` : "";
-	dn.stdout.on("data", (data) => {
-		Logger.logVerbose(`${logPre}${data}`.trim());
-	});
+	return new Promise((resolve, reject) => {
+		Logger.logVerbose(`Start running: "${exe} ${args.map(s => `'${s}'`).join(" ")}" in ${workFolder}...`);
+		const dn = spawn(exe, [...args], { cwd: workFolder});
 
-	dn.stderr.on("data", (data) => {
-		Logger.logError(`${logPre}${data}`.trim());
-	});
+		const logPre = logName ? `${logName}: ` : "";
+		dn.stdout.on("data", (data) => {
+			Logger.logVerbose(`${logPre}${data}`.trim());
+		});
 
-	dn.on("close", (code) => {
-		Logger.logVerbose(`${logPre}exit code:${code}`.trim());
-		if(onClose){
-			onClose(code);
-		}
+		dn.stderr.on("data", (data) => {
+			Logger.logError(`${logPre}${data}`.trim());
+		});
+
+		dn.on("close", (code) => {
+			Logger.logVerbose(`${logPre}exit code:${code}`.trim());
+			if(code === expectedExitCode){
+				resolve(code);
+			}
+			else{
+				reject("Process failed with exit code: " + code);
+			}
+		});
 	});
 }
 //#endregion
