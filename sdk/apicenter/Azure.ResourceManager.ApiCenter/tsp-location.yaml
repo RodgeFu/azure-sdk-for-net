@@ -1,0 +1,4 @@
+directory: specification\apicenter\ApiCenter.Management
+commit: 416fe10cb143a46ffbee5551326520b08a2ddf4c
+repo: Azure/azure-rest-api-specs
+emitterPackageJsonPath: "eng/azure-typespec-http-client-csharp-mgmt-emitter-package.json"
